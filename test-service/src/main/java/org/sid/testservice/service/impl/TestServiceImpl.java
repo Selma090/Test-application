@@ -1,6 +1,8 @@
 package org.sid.testservice.service.impl;
 
+import org.sid.testservice.dto.JiraDto;
 import org.sid.testservice.dto.TestDto;
+import org.sid.testservice.entity.Jira;
 import org.sid.testservice.entity.Test;
 import org.sid.testservice.mapper.TestMapper;
 import org.sid.testservice.repository.TestRepository;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,26 +22,35 @@ public class TestServiceImpl implements TestService {
 
     @Autowired
     public TestServiceImpl(TestRepository testRepository) {
-
         this.testRepository = testRepository;
+    }
+
+    @Override
+    public Map<String, Long> getTestCaseCountsByJiraId(Long jiraId) {
+        List<Object[]> results = testRepository.findTestCaseCountsByJiraId(jiraId);
+        Map<String, Long> counts = new HashMap<>();
+        for (Object[] result : results) {
+            String status = (String) result[0];
+            Long count = (Long) result[1];
+            counts.put(status, count);
+        }
+        return counts;
     }
 
     @Override
     public List<TestDto> getAllTests() {
         List<Test> tests = testRepository.findAll();
         return tests.stream()
-                .map(test -> TestMapper.maptoTestDto(test))
+                .map(TestMapper::maptoTestDto)
                 .filter(Objects::nonNull)
                 .sorted((test1, test2) -> {
-                    // Sort by priority, handling null values
                     if (test1.getPriority() == null && test2.getPriority() == null) {
                         return 0;
                     } else if (test1.getPriority() == null) {
-                        return 1; // test1 is considered higher priority if it's null
+                        return 1;
                     } else if (test2.getPriority() == null) {
-                        return -1; // test2 is considered higher priority if it's null
+                        return -1;
                     }
-                    // Custom ordering based on priority levels, case-insensitive
                     List<String> priorityOrder = Arrays.asList("high", "medium", "low");
                     String priority1 = test1.getPriority().toLowerCase();
                     String priority2 = test2.getPriority().toLowerCase();
@@ -49,37 +61,96 @@ public class TestServiceImpl implements TestService {
 
     @Override
     public TestDto getTestById(Long id) {
-
-        Test test = testRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Test does not exist : "+ id));
+        Test test = testRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Test does not exist: " + id));
         return TestMapper.maptoTestDto(test);
     }
 
     @Override
-    public TestDto createTest(TestDto testDto) {
-
+    public TestDto createTest(TestDto testDto, JiraDto jiraDto) {
         Test test = TestMapper.maptoTest(testDto);
-        Test createdTest = testRepository.save(test);
-
-        return TestMapper.maptoTestDto(createdTest);
+        test.setJira(mapJiraDtoToEntity(jiraDto));
+        test = testRepository.save(test);
+        return TestMapper.maptoTestDto(test);
     }
 
     @Override
-    public TestDto updateTest(Long id, TestDto updatedTest) {
+    public TestDto updateTest(Long id, TestDto updatedTest, JiraDto updatedJira) {
         Test test = testRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("id does not exist : " + id)
+                () -> new ResourceNotFoundException("id does not exist: " + id)
         );
 
+        // Update test attributes
         test.setName(updatedTest.getName());
+        test.setTest_statut(updatedTest.getTest_statut());
+        test.setDeadline(updatedTest.getDeadline());
+        test.setPriority(updatedTest.getPriority());
 
+        // Update Jira attributes
+        Jira jira = mapJiraDtoToEntity(updatedJira);
+        test.setJira(jira);
 
         Test updatedTestObj = testRepository.save(test);
-
         return TestMapper.maptoTestDto(updatedTestObj);
     }
 
+
     @Override
     public void deleteTest(Long id) {
-
         testRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean validateTestCase(Long id) {
+        Test test = testRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Test case not found with id: " + id));
+        return checkCondition(test);
+    }
+
+    private boolean checkCondition(Test test) {
+        return test != null && "Done".equalsIgnoreCase(test.getTest_statut());
+    }
+
+    private boolean isDeadlineExceeded(Test test) {
+        return test.getDeadline() != null && test.getDeadline().before(new Date());
+    }
+
+    private void sendNotification(Test test) {
+        boolean statusChanged = isStatusChanged(test);
+        boolean deadlineExceeded = isDeadlineExceeded(test);
+
+        if (statusChanged || deadlineExceeded) {
+            System.out.println("Notification sent: Test case with ID " + test.getId() +
+                    (statusChanged ? " status changed." : "") +
+                    (deadlineExceeded ? " deadline exceeded." : ""));
+        }
+    }
+
+    private boolean isStatusChanged(Test test) {
+        Test previousTest = testRepository.findById(test.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Test case not found with id: " + test.getId()));
+        return !test.getTest_statut().equals(previousTest.getTest_statut());
+    }
+
+    @Override
+    public List<TestDto> getOverdueTests() {
+        List<Test> allTests = testRepository.findAll();
+        List<Test> overdueTests = allTests.stream()
+                .filter(this::isDeadlineExceeded)
+                .collect(Collectors.toList());
+        return overdueTests.stream()
+                .map(TestMapper::maptoTestDto)
+                .collect(Collectors.toList());
+    }
+
+    private Jira mapJiraDtoToEntity(JiraDto jiraDto) {
+        return new Jira(
+                jiraDto.getId(),
+                jiraDto.getOuvert_par(),
+                jiraDto.getN_jira(),
+                jiraDto.getCommentaire(),
+                jiraDto.getStatut(),
+                jiraDto.getGravite(),
+                jiraDto.getLibelle()
+        );
     }
 }

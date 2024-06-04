@@ -3,6 +3,9 @@ package org.sid.testservice.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.sid.testservice.entity.Jira;
+
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -11,4 +14,8 @@ public class TestDto {
     private Long id;
     private String name;
     private String priority;
+    private String test_statut;
+    private Date deadline;
+
+    private Jira jira;
 }

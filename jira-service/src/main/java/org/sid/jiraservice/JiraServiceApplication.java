@@ -8,7 +8,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 @SpringBootApplication
 public class JiraServiceApplication {
 
-	public static void main(String[] args) {SpringApplication.run(JiraServiceApplication.class, args);
+	public static void main(String[] args) {
+		SpringApplication.run(JiraServiceApplication.class, args);
 	}
 
 }

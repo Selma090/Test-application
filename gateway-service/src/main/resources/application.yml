@@ -1,0 +1,35 @@
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+      routes:
+        - id: AuthenticatedBackend
+          uri: lb://AuthenticatedBackend
+          predicates:
+            - Path=/auth/**
+        - id: documentation-service
+          uri: lb://documentation-service
+          predicates:
+            - Path=/api/documentation/**
+        - id: test-service
+          uri: lb://test-service
+          predicates:
+            - Path=/api/tests/**
+        - id: kpi-service
+          uri: lb://kpi-service
+          predicates:
+            - Path=/api/kpis/**
+        - id: jira-service
+          uri: lb://jira-service
+          predicates:
+            - Path=/api/jiras/**

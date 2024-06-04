@@ -9,7 +9,10 @@ public class TestMapper {
         return new TestDto(
                 test.getId(),
                 test.getName(),
-                test.getPriority()
+                test.getPriority(),
+                test.getTest_statut(),
+                test.getDeadline(),
+                test.getJira()
         );
     }
 
@@ -17,7 +20,10 @@ public class TestMapper {
         return new Test(
                 testDto.getId(),
                 testDto.getName(),
-                testDto.getPriority()
+                testDto.getPriority(),
+                testDto.getTest_statut(),
+                testDto.getDeadline(),
+                testDto.getJira()
         );
     }
 }
