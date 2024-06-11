@@ -16,6 +16,7 @@ public class TestDto {
     private String priority;
     private String test_statut;
     private Date deadline;
+    private String validation_statut;
 
     private Jira jira;
 }

@@ -12,6 +12,7 @@ public class TestMapper {
                 test.getPriority(),
                 test.getTest_statut(),
                 test.getDeadline(),
+                test.getValidation_statut(),
                 test.getJira()
         );
     }
@@ -22,6 +23,7 @@ public class TestMapper {
                 testDto.getName(),
                 testDto.getPriority(),
                 testDto.getTest_statut(),
+                testDto.getValidation_statut(),
                 testDto.getDeadline(),
                 testDto.getJira()
         );

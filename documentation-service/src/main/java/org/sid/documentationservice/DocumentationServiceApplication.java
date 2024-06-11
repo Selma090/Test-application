@@ -53,16 +53,6 @@ public class DocumentationServiceApplication {
 		}
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deletePdf(@PathVariable Long id) {
-		try {
-			documentationService.deletePdf(id);
-			return ResponseEntity.ok("PDF deleted successfully");
-		} catch (Exception e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete PDF", e);
-		}
-	}
-
 	@GetMapping("/files")
 	public ResponseEntity<List<String>> listFiles() {
 		try {

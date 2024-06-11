@@ -39,18 +39,6 @@ public class DocumentationService {
         return pdfs;
     }
 
-    public void deletePdf(Long id) {
-        try {
-            documentationRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            // Handle case where the entity with the given ID doesn't exist
-            throw new EntityNotFoundException("Documentation with ID " + id + " not found");
-        } catch (Exception e) {
-            // Handle other unexpected exceptions
-            throw new RuntimeException("Failed to delete PDF with ID " + id, e);
-        }
-    }
-
     public List<String> listFiles() {
         return documentationRepository.findAll().stream()
                 .map(Documentation::getName)

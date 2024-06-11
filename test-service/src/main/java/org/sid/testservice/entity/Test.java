@@ -22,6 +22,7 @@ public class Test {
     private String name;
     private String priority;
     private String test_statut;
+    private String validation_statut;
     private Date deadline;
 
     @ManyToOne(fetch = FetchType.EAGER) // Lazy fetch for optimization

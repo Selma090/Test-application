@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -45,35 +44,37 @@ public class TestControlller {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('CP')")
+    //@PreAuthorize("hasAuthority('CE')")
     public ResponseEntity<TestDto> getTestById(@PathVariable("id") Long id){
-
-
         TestDto testDto = testService.getTestById(id);
         return ResponseEntity.ok(testDto);
     }
 
     @PostMapping
-    public ResponseEntity<TestDto> createTest(@RequestBody @Valid TestDto testDto, @RequestParam("id") Long jiraId) {
-        // Fetch the Jira issue
-        JiraDto jiraDto = jiraServiceClient.getJiraById(jiraId);
-
-        // Create Test entity
+    //@PreAuthorize("hasAuthority('TEST')")
+    public ResponseEntity<TestDto> createTest(@RequestBody @Valid TestDto testDto, @RequestParam(value = "id", required = false) Long jiraId) {
+        System.out.println("Received Jira ID: " + jiraId);
+        JiraDto jiraDto = null;
+        if (jiraId != null) {
+            jiraDto = jiraServiceClient.getJiraById(jiraId);
+        }
         TestDto createdTest = testService.createTest(testDto, jiraDto);
         return new ResponseEntity<>(createdTest, HttpStatus.CREATED);
     }
 
 
+
     @PutMapping("/{id}")
-    public ResponseEntity<TestDto> updateTest(@PathVariable("id") Long id, @RequestBody @Valid TestDto updatedTest, @RequestParam("jiraId") Long jiraId) {
-        // Fetch the Jira issue
-        JiraDto updatedJira = jiraServiceClient.getJiraById(jiraId);
+    public ResponseEntity<TestDto> updateTest(@PathVariable("id") Long id, @RequestBody @Valid TestDto updatedTest, @RequestParam(value = "jiraId", required = false) Long jiraId) {
+        JiraDto updatedJira = null;
+        if (jiraId != null) {
+            updatedJira = jiraServiceClient.getJiraById(jiraId);
+        }
 
-        // Update the test with the provided details
         TestDto testDto = testService.updateTest(id, updatedTest, updatedJira);
-
         return ResponseEntity.ok(testDto);
     }
+
 
 
     @DeleteMapping("/{id}")

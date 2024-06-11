@@ -62,16 +62,20 @@ public class TestServiceImpl implements TestService {
     @Override
     public TestDto getTestById(Long id) {
         Test test = testRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Test does not exist: " + id));
+
         return TestMapper.maptoTestDto(test);
     }
 
     @Override
     public TestDto createTest(TestDto testDto, JiraDto jiraDto) {
         Test test = TestMapper.maptoTest(testDto);
-        test.setJira(mapJiraDtoToEntity(jiraDto));
+        if (jiraDto != null) {
+            test.setJira(mapJiraDtoToEntity(jiraDto));
+        }
         test = testRepository.save(test);
         return TestMapper.maptoTestDto(test);
     }
+
 
     @Override
     public TestDto updateTest(Long id, TestDto updatedTest, JiraDto updatedJira) {
@@ -79,19 +83,21 @@ public class TestServiceImpl implements TestService {
                 () -> new ResourceNotFoundException("id does not exist: " + id)
         );
 
-        // Update test attributes
         test.setName(updatedTest.getName());
         test.setTest_statut(updatedTest.getTest_statut());
         test.setDeadline(updatedTest.getDeadline());
         test.setPriority(updatedTest.getPriority());
+        test.setValidation_statut(updatedTest.getValidation_statut());
 
-        // Update Jira attributes
-        Jira jira = mapJiraDtoToEntity(updatedJira);
-        test.setJira(jira);
+        if (updatedJira != null) {
+            Jira jira = mapJiraDtoToEntity(updatedJira);
+            test.setJira(jira);
+        }
 
         Test updatedTestObj = testRepository.save(test);
         return TestMapper.maptoTestDto(updatedTestObj);
     }
+
 
 
     @Override
@@ -103,8 +109,14 @@ public class TestServiceImpl implements TestService {
     public boolean validateTestCase(Long id) {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Test case not found with id: " + id));
-        return checkCondition(test);
+
+        if ("validated".equalsIgnoreCase(test.getValidation_statut())) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
     private boolean checkCondition(Test test) {
         return test != null && "Done".equalsIgnoreCase(test.getTest_statut());
@@ -143,6 +155,9 @@ public class TestServiceImpl implements TestService {
     }
 
     private Jira mapJiraDtoToEntity(JiraDto jiraDto) {
+        if (jiraDto == null) {
+            return null; // Or handle the case accordingly
+        }
         return new Jira(
                 jiraDto.getId(),
                 jiraDto.getOuvert_par(),
@@ -153,4 +168,5 @@ public class TestServiceImpl implements TestService {
                 jiraDto.getLibelle()
         );
     }
+
 }
