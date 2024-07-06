@@ -28,7 +28,7 @@ public class DocumentationServiceApplication {
 		this.documentationService = documentationService;
 	}
 
-	@PostMapping
+	@PostMapping("/create")
 	public ResponseEntity<Map<String, String>> uploadPdf(@RequestParam("pdf") MultipartFile file) {
 		try {
 			String uploadMessage = documentationService.uploadPdf(file);

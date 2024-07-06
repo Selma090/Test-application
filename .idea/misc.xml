@@ -13,7 +13,13 @@
         <option value="$PROJECT_DIR$/gateway-service/pom.xml" />
         <option value="$PROJECT_DIR$/documentation-service/pom.xml" />
         <option value="$PROJECT_DIR$/AuthenticatedBackend/pom.xml" />
+        <option value="$PROJECT_DIR$/Deb-Service/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/Deb-Service/pom.xml" />
+      </set>
     </option>
     <option name="workspaceImportForciblyTurnedOn" value="true" />
   </component>

@@ -5,6 +5,7 @@ import org.sid.jiraservice.service.JiraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,7 +23,7 @@ public class JiraController {
         this.jiraService = jiraService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<JiraDto>> getAllJiras() {
         List<JiraDto> jiras = jiraService.getAllJiras();
         return ResponseEntity.ok(jiras);
@@ -35,19 +36,19 @@ public class JiraController {
         return ResponseEntity.ok(jiraDto);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<JiraDto> createJira(@RequestBody JiraDto jiraDto) {
         JiraDto createdJira = jiraService.createJira(jiraDto);
         return new ResponseEntity<>(createdJira, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<JiraDto> updateJira(@PathVariable("id") Long id, @RequestBody @Valid JiraDto updatedjira) {
         JiraDto jiraDto = jiraService.updateJira(id, updatedjira);
         return ResponseEntity.ok(jiraDto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteJira(@PathVariable Long id) {
         jiraService.deleteJira(id);
         return ResponseEntity.noContent().build();

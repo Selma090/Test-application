@@ -1,8 +1,8 @@
 package org.sid.testservice.controller;
 
+import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.sid.testservice.dto.JiraDto;
 import org.sid.testservice.dto.TestDto;
-import org.sid.testservice.entity.Test;
 import org.sid.testservice.service.JiraServiceClient;
 import org.sid.testservice.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +25,8 @@ public class TestControlller {
 
     private final TestService testService;
     private final JiraServiceClient jiraServiceClient;
-
+    @Autowired
+    private KeycloakRestTemplate keycloakRestTemplate;
     @Autowired
     public TestControlller(TestService testService, JiraServiceClient jiraServiceClient) {
 
@@ -32,7 +34,7 @@ public class TestControlller {
         this.jiraServiceClient = jiraServiceClient;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<TestDto>> getAllTests() {
         List<TestDto> tests = testService.getAllTests();
         return ResponseEntity.ok(tests);
@@ -43,17 +45,17 @@ public class TestControlller {
         return testService.getTestCaseCountsByJiraId(jiraId);
     }
 
+
     @GetMapping("/{id}")
-    //@PreAuthorize("hasAuthority('CE')")
     public ResponseEntity<TestDto> getTestById(@PathVariable("id") Long id){
         TestDto testDto = testService.getTestById(id);
         return ResponseEntity.ok(testDto);
     }
 
-    @PostMapping
-    //@PreAuthorize("hasAuthority('TEST')")
+    @PostMapping("/create")
     public ResponseEntity<TestDto> createTest(@RequestBody @Valid TestDto testDto, @RequestParam(value = "id", required = false) Long jiraId) {
         System.out.println("Received Jira ID: " + jiraId);
+        System.out.println("Received Test Data: " + testDto);
         JiraDto jiraDto = null;
         if (jiraId != null) {
             jiraDto = jiraServiceClient.getJiraById(jiraId);
@@ -64,20 +66,21 @@ public class TestControlller {
 
 
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<TestDto> updateTest(@PathVariable("id") Long id, @RequestBody @Valid TestDto updatedTest, @RequestParam(value = "jiraId", required = false) Long jiraId) {
+        System.out.println("Updating Test ID: " + id);
+        System.out.println("Received Jira ID: " + jiraId);
+        System.out.println("Received Test Data: " + updatedTest);
         JiraDto updatedJira = null;
         if (jiraId != null) {
             updatedJira = jiraServiceClient.getJiraById(jiraId);
         }
-
         TestDto testDto = testService.updateTest(id, updatedTest, updatedJira);
         return ResponseEntity.ok(testDto);
     }
 
 
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteTest(@PathVariable Long id) {
         testService.deleteTest(id);
         return ResponseEntity.noContent().build();

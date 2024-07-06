@@ -1,7 +1,9 @@
 package com.authentification.dtos;
 
 import com.authentification.models.ApplicationUser;
+import lombok.Builder;
 
+@Builder
 public class LoginResponseDTO {
     private ApplicationUser user;
     private String jwt;

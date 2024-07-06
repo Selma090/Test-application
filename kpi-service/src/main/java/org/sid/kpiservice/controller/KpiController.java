@@ -21,7 +21,7 @@ public class KpiController {
         this.kpiService = kpiService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<KpiDto>> getAllKpis() {
         List<KpiDto> kpis = kpiService.getAllKpis();
         return ResponseEntity.ok(kpis);
@@ -34,19 +34,19 @@ public class KpiController {
         return ResponseEntity.ok(kpiDto);
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<KpiDto> createKpi(@RequestBody KpiDto kpiDto) {
         KpiDto createdKpi = kpiService.createKpi(kpiDto);
         return new ResponseEntity<>(createdKpi, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<KpiDto> updateKpi(@PathVariable("id") Long id, @RequestBody @Valid KpiDto updatedkpi) {
         KpiDto kpiDto = kpiService.updateKpi(id, updatedkpi);
         return ResponseEntity.ok(kpiDto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteKpi(@PathVariable Long id) {
         kpiService.deleteKpi(id);
         return ResponseEntity.noContent().build();

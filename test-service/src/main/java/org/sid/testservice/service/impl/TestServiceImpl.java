@@ -9,6 +9,7 @@ import org.sid.testservice.repository.TestRepository;
 import org.sid.testservice.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
@@ -60,6 +61,7 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
+
     public TestDto getTestById(Long id) {
         Test test = testRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Test does not exist: " + id));
 
@@ -67,6 +69,7 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
+
     public TestDto createTest(TestDto testDto, JiraDto jiraDto) {
         Test test = TestMapper.maptoTest(testDto);
         if (jiraDto != null) {
@@ -110,7 +113,7 @@ public class TestServiceImpl implements TestService {
         Test test = testRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Test case not found with id: " + id));
 
-        if ("validated".equalsIgnoreCase(test.getValidation_statut())) {
+        if ("Validated".equalsIgnoreCase(test.getValidation_statut())) {
             return true;
         } else {
             return false;
